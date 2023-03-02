@@ -8,31 +8,15 @@ public class EnemyBehavior : MonoBehaviour
     public int xProspective, yProspective;
 
     public bool[] attributes;
-    public Sprite[] attributeSprites;
-    private List<GameObject> attributeObjects = new List<GameObject>();
+    public SpriteRenderer[] attributeIcons;
 
     public bool isAlive = true;
 
     public void UpdateAttributeDisplay()
     {
-        foreach(GameObject sprite in attributeObjects)
+        for(int i = 1; i < attributes.Length; i++)
         {
-            Destroy(sprite);
-        }
-
-        attributeObjects = new List<GameObject>();
-
-        for (int i = 1; i < attributes.Length; i++)
-        {
-            if (attributes[i]) {
-                SpriteRenderer newIcon = new GameObject().AddComponent<SpriteRenderer>();
-                newIcon.transform.parent = transform;
-                newIcon.transform.localPosition = new Vector3(0, 0, -1);
-                newIcon.sprite = attributeSprites[i];
-                newIcon.transform.localScale = new Vector3(.2f,.2f);
-                newIcon.sortingOrder = 10;
-                attributeObjects.Add(newIcon.gameObject);
-            }
+            attributeIcons[i].enabled = attributes[i];
         }
     }
 
@@ -75,6 +59,8 @@ public class EnemyBehavior : MonoBehaviour
         {
             sprite.enabled = isAlive;
         }
+
+        UpdateAttributeDisplay();
     }
 
     public void UpdatePosition()

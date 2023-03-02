@@ -160,7 +160,8 @@ MonoBehaviour:
   selector: {fileID: 1995956796}
   manaSprite: {fileID: 21300000, guid: 18a6e734c39e7d8459458161d1bf398f, type: 3}
   manaSpriteEmpty: {fileID: 21300000, guid: 0158102dd78998c4ba900b654358870e, type: 3}
-  selectedSpell: -1
+  spellCount: 0
+  selectedSpell: 0
   maxMana: 3
   mana: 3
 --- !u!4 &8637855

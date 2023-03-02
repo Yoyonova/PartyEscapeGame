@@ -13,12 +13,9 @@ public class SpellManager : MonoBehaviour
     public GameObject spellPrefab, selector;
     public Sprite manaSprite, manaSpriteEmpty;
 
-    private int spellCount;
     private SpellBehavior[] spells;
 
-    public int selectedSpell = -1;
-    public int maxMana = 3;
-    public int mana = 3;
+    public int spellCount, selectedSpell, maxMana, mana;
     private List<GameObject> manaIcons = new List<GameObject>();
 
     void Update()
