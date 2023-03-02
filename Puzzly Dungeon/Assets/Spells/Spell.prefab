@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   iconOffset: {x: 1, y: 0, z: 0}
-  iconSize: 0.2
-  iconGap: 0.3
+  iconSize: 0.4
+  iconGap: 0.6
   iconSprites:
   - {fileID: 21300000, guid: e505e10a36f9ea848a7bb54d3a4d1751, type: 3}
   - {fileID: 0}
@@ -76,3 +76,4 @@ MonoBehaviour:
   - {fileID: 0}
   maxSpellSize: 5
   spellText: {fileID: 4900000, guid: 0941b9e27e7c8714b836ec11ffc8528b, type: 3}
+  cost: 0

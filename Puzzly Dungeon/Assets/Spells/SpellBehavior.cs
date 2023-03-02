@@ -17,10 +17,6 @@ public class SpellBehavior : MonoBehaviour
     private char[,] effects;
     private SpriteRenderer[] icons;
 
-    void Start()
-    {
-
-    }
     public void LoadSpell(string spellId)
     {
         int spellIndex = spellText.text.IndexOf(spellId);
@@ -48,24 +44,74 @@ public class SpellBehavior : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        
-    }
-
     public void castSpell(int x, int y)
     {
         int spellRadius = maxSpellSize / 2;
+        EnemyManager enemyManager = EnemyManager.instance;
+        EnemyBehavior[,] enemies = enemyManager.enemies;
 
-        for(int i = Math.Max(0, x - spellRadius); i < Math.Min(EnemyManager.instance.gridWidth, x + spellRadius); i++)
+        for (int i = Math.Max(0, x - spellRadius); i < Math.Min(enemyManager.gridWidth, x + spellRadius); i++)
         {
-            for (int j = Math.Max(0, y - spellRadius); j < Math.Min(EnemyManager.instance.gridHeight, y + spellRadius); j++)
+            for (int j = Math.Max(0, y - spellRadius); j < Math.Min(enemyManager.gridHeight, y + spellRadius); j++)
             {
-                if (EnemyManager.instance.enemies[i, j] != null)
+                if (enemies[i, j] != null)
                 {
-                    EnemyManager.instance.enemies[i, j].ApplyEffect(effects[i - x + spellRadius, y - j + spellRadius]);
+                    enemies[i, j].ApplyEffect(effects[i - x + spellRadius, y - j + spellRadius]);
                 }
             }
+        }
+
+
+        bool isValidBoard = false;
+        int TESTCOUNT = 0;
+
+        while (!isValidBoard && TESTCOUNT < 1000)
+        {
+            TESTCOUNT++;
+            isValidBoard = true;
+
+            EnemyBehavior[,] newEnemies = new EnemyBehavior[enemyManager.gridWidth, enemyManager.gridHeight];
+
+            foreach (EnemyBehavior enemy in enemyManager.transform.GetComponentsInChildren<EnemyBehavior>())
+            {
+                if (enemy.isAlive)
+                {
+                    bool enemyIsOutsideX = enemy.xProspective < 0 || enemy.xProspective >= enemyManager.gridWidth;
+                    bool enemyIsOutsideY = enemy.yProspective < 0 || enemy.yProspective >= enemyManager.gridHeight;
+                    bool enemyIsOnPlayer = (enemy.xProspective == enemyManager.player.x) && (enemy.yProspective == enemyManager.player.y);
+                    if (enemyIsOutsideX || enemyIsOutsideY || enemyIsOnPlayer)
+                    {
+                        enemy.xProspective = enemy.x;
+                        enemy.yProspective = enemy.y;
+
+                        isValidBoard = false;
+                    } else if (newEnemies[enemy.xProspective, enemy.yProspective] != null) // Collision occurred, so cancel movement
+                    {
+                        EnemyBehavior collidedEnemy = newEnemies[enemy.xProspective, enemy.yProspective];
+                        collidedEnemy.xProspective = collidedEnemy.x;
+                        collidedEnemy.yProspective = collidedEnemy.y;
+                        enemy.xProspective = enemy.x;
+                        enemy.yProspective = enemy.y;
+
+                        isValidBoard = false;
+                    } else
+                    {
+                        newEnemies[enemy.xProspective, enemy.yProspective] = enemy;
+                    }
+                }
+            }
+        }
+
+        foreach (EnemyBehavior enemy in enemyManager.transform.GetComponentsInChildren<EnemyBehavior>())
+        {
+            enemy.ConfirmEffect();
+        }
+
+        enemyManager.UpdateEnemyPositions();
+
+        if(TESTCOUNT >= 1000)
+        {
+            Destroy(transform.gameObject);
         }
     }
 }

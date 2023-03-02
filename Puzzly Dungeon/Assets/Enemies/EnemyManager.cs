@@ -90,6 +90,16 @@ public class EnemyManager : MonoBehaviour
         enemies[x, y].UpdateAttributeDisplay();
     }
 
+    public void UpdateEnemyPositions()
+    {
+        enemies = new EnemyBehavior[gridWidth, gridHeight];
+
+        foreach (EnemyBehavior enemy in transform.GetComponentsInChildren<EnemyBehavior>())
+        {
+            enemies[enemy.x, enemy.y] = enemy;
+        }
+    }
+
     public bool ContainsEnemy(int x, int y)
     {
         return (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight && enemies[x, y] != null && enemies[x, y].isAlive);

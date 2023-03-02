@@ -5,6 +5,7 @@ using UnityEngine;
 public class EnemyBehavior : MonoBehaviour
 {
     public int x, y;
+    public int xProspective, yProspective;
 
     public bool[] attributes;
     public Sprite[] attributeSprites;
@@ -29,6 +30,7 @@ public class EnemyBehavior : MonoBehaviour
                 newIcon.transform.localPosition = new Vector3(0, 0, -1);
                 newIcon.sprite = attributeSprites[i];
                 newIcon.transform.localScale = new Vector3(.2f,.2f);
+                newIcon.sortingOrder = 10;
                 attributeObjects.Add(newIcon.gameObject);
             }
         }
@@ -36,26 +38,42 @@ public class EnemyBehavior : MonoBehaviour
 
     public void ApplyEffect(char effect)
     {
-        if (effect == 'X')
+        switch (effect)
         {
-            if(attributes[1])
-            {
-                attributes[1] = false;
-                UpdateAttributeDisplay();
-            } else
-            {
-                isAlive = false;
-                UpdateVisibility();
-            }
+            case 'X':
+                if (attributes[1]) // Has a shield
+                {
+                    attributes[1] = false;
+                    UpdateAttributeDisplay();
+                }
+                else
+                {
+                    isAlive = false;
+                    UpdateVisibility();
+                }
+                break;
+            case 'R':
+                xProspective += 1;
+                break;
+            case 'L':
+                xProspective -= 1;
+                break;
+            case 'U':
+                yProspective += 1;
+                break;
+            case 'D':
+                yProspective -= 1;
+                break;
+            default:
+                break;
         }
     }
 
     private void UpdateVisibility()
     {
-        transform.GetComponent<SpriteRenderer>().enabled = isAlive;
-        foreach(GameObject sprite in attributeObjects)
+        foreach (SpriteRenderer sprite in transform.GetComponentsInChildren<SpriteRenderer>())
         {
-            sprite.GetComponent<SpriteRenderer>().enabled = isAlive;
+            sprite.enabled = isAlive;
         }
     }
 
@@ -63,5 +81,15 @@ public class EnemyBehavior : MonoBehaviour
     {
         transform.localPosition = new Vector3((x + 0.5f) * EnemyManager.instance.cellSize, (y + 0.5f) * EnemyManager.instance.cellSize);
         transform.localScale = new Vector3(EnemyManager.instance.cellSize, EnemyManager.instance.cellSize);
+        xProspective = x;
+        yProspective = y;
+    }
+
+    public void ConfirmEffect()
+    {
+        x = xProspective;
+        y = yProspective;
+
+        UpdatePosition();
     }
 }

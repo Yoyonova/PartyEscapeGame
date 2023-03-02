@@ -10,22 +10,17 @@ public class SpellManager : MonoBehaviour
 
     public EnemyManager enemyManager;
     public PlayerBehavior player;
-    public GameObject spellPrefab;
-    public GameObject selector;
+    public GameObject spellPrefab, selector;
+    public Sprite manaSprite, manaSpriteEmpty;
 
     private int spellCount;
     private SpellBehavior[] spells;
 
     public int selectedSpell = -1;
+    public int maxMana = 3;
     public int mana = 3;
+    private List<GameObject> manaIcons = new List<GameObject>();
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -53,6 +48,7 @@ public class SpellManager : MonoBehaviour
                 {
                     mana -= spells[selectedSpell].cost;
                     spells[selectedSpell].castSpell(enemyX, enemyY);
+                    UpdateManaDisplay();
                     player.TryEscape();
                 }
             } else if (clickedOnSpell)
@@ -80,6 +76,30 @@ public class SpellManager : MonoBehaviour
 
             spells[i].transform.parent = transform;
             spells[i].transform.localPosition = new Vector3(0, i * -1 * SpellPositionGap);
+        }
+
+        UpdateManaDisplay();
+    }
+
+    public void UpdateManaDisplay()
+    {
+        foreach (GameObject sprite in manaIcons)
+        {
+            Destroy(sprite);
+        }
+
+        manaIcons = new List<GameObject>();
+
+        for (int i = 0; i < maxMana; i++)
+        {
+            Sprite newSprite = (i < mana) ? manaSprite : manaSpriteEmpty;
+            SpriteRenderer newIcon = new GameObject().AddComponent<SpriteRenderer>();
+            newIcon.transform.parent = transform;
+            newIcon.transform.localPosition = new Vector3(1.5f + (i % 2), 3 - 0.5f * i);
+            newIcon.sprite = newSprite;
+            newIcon.transform.localScale = new Vector3(.5f, .5f);
+            newIcon.sortingOrder = 10;
+            manaIcons.Add(newIcon.gameObject);
         }
     }
 }
