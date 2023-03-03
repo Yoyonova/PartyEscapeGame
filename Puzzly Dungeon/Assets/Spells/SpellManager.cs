@@ -41,12 +41,11 @@ public class SpellManager : MonoBehaviour
                 bool targetExists = enemyManager.enemies[enemyX, enemyY] != null && enemyManager.enemies[enemyX, enemyY].isAlive;
                 bool spellIsCastable = selectedSpell >= 0 && spells[selectedSpell].cost <= mana;
 
-                if (targetExists && spellIsCastable)
+                if (targetExists && spellIsCastable && !enemyManager.isProcessing)
                 {
                     mana -= spells[selectedSpell].cost;
                     spells[selectedSpell].castSpell(enemyX, enemyY);
                     UpdateManaDisplay();
-                    player.TryEscape();
                 }
             } else if (clickedOnSpell)
             {

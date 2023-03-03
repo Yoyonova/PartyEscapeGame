@@ -414,17 +414,19 @@ MonoBehaviour:
   levelText: {fileID: 4900000, guid: 1e22c0c0af25bbc45a47b6b0d1c714ed, type: 3}
   maxGridWidth: 9
   maxGridHeight: 9
-  baseCellSize: 6
-  cellSize: 1
-  currentLevel: AAA
   gridHeight: 3
   gridWidth: 3
   spellCount: 3
+  baseCellSize: 6
+  cellSize: 1
+  effectDuration: 0.5
+  currentLevel: AAB
   spellManager: {fileID: 8637854}
   player: {fileID: 203245416}
   exitX: 0
   exitY: 0
   spells: []
+  isProcessing: 0
 --- !u!1 &1995956796
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,21 +9,20 @@ public class EnemyManager : MonoBehaviour
     public GameObject[] enemyPrefabs;
     public GameObject enemyPrefab;
     public TextAsset levelText;
-    public int maxGridWidth = 9;
-    public int maxGridHeight = 9;
-    public float baseCellSize;
-    public float cellSize;
+    public int maxGridWidth, maxGridHeight, gridHeight, gridWidth, spellCount;
+    public float baseCellSize, cellSize, effectDuration;
 
-    public string currentLevel = "AAA";
-    public int gridHeight = 3;
-    public int gridWidth = 3;
-    public int spellCount = 3;
+    public string currentLevel;
     public SpellManager spellManager;
     public PlayerBehavior player;
 
     public EnemyBehavior[,] enemies;
     public int exitX, exitY;
     public string[] spells;
+
+    public bool isProcessing;
+    private bool[,] positionHistory;
+    public Vector2Int[,] movementHistory;
 
     void Start()
     {
@@ -96,7 +95,7 @@ public class EnemyManager : MonoBehaviour
 
         foreach (EnemyBehavior enemy in transform.GetComponentsInChildren<EnemyBehavior>())
         {
-            enemies[enemy.x, enemy.y] = enemy;
+            if(enemy.isAlive) enemies[enemy.x, enemy.y] = enemy;
         }
     }
 
@@ -108,5 +107,108 @@ public class EnemyManager : MonoBehaviour
     public bool IsObstructed(int x, int y)
     {
         return (ContainsEnemy(x, y) || x < 0 || x >= gridWidth || y < 0 || y >= gridHeight);
+    }
+
+    public IEnumerator ProcessSpellEffect()
+    {
+        isProcessing = true;
+
+        while (isProcessing)
+        {
+
+            bool isValidBoard = false;
+
+            while (!isValidBoard)
+            {
+                isValidBoard = true;
+
+                EnemyBehavior[,] newEnemies = new EnemyBehavior[gridWidth, gridHeight];
+
+                foreach (EnemyBehavior enemy in transform.GetComponentsInChildren<EnemyBehavior>())
+                {
+                    if (enemy.isAlive)
+                    {
+                        bool enemyIsOutsideX = enemy.xProspective < 0 || enemy.xProspective >= gridWidth;
+                        bool enemyIsOutsideY = enemy.yProspective < 0 || enemy.yProspective >= gridHeight;
+                        bool enemyIsOnPlayer = (enemy.xProspective == player.x) && (enemy.yProspective == player.y);
+                        if (enemyIsOutsideX || enemyIsOutsideY || enemyIsOnPlayer)
+                        {
+                            enemy.xProspective = enemy.x;
+                            enemy.yProspective = enemy.y;
+
+                            isValidBoard = false;
+                        }
+                        else if (newEnemies[enemy.xProspective, enemy.yProspective] != null) // Collision occurred, so cancel movement
+                        {
+                            EnemyBehavior collidedEnemy = newEnemies[enemy.xProspective, enemy.yProspective];
+                            collidedEnemy.xProspective = collidedEnemy.x;
+                            collidedEnemy.yProspective = collidedEnemy.y;
+                            enemy.xProspective = enemy.x;
+                            enemy.yProspective = enemy.y;
+
+                            isValidBoard = false;
+                        }
+                        else
+                        {
+                            newEnemies[enemy.xProspective, enemy.yProspective] = enemy;
+                        }
+                    }
+                }
+            }
+
+            movementHistory = new Vector2Int[gridWidth, gridHeight];
+            positionHistory = new bool[gridWidth, gridHeight];
+            for (int i = 0; i < gridWidth; i++)
+            {
+                for (int j = 0; j < gridHeight; j++)
+                {
+                    positionHistory[i, j] = (enemies[i, j] != null) && enemies[i, j].isAlive;
+                }
+            }
+
+            foreach (EnemyBehavior enemy in transform.GetComponentsInChildren<EnemyBehavior>())
+            {
+                enemy.ConfirmEffect();
+            }
+
+            UpdateEnemyPositions();
+
+            foreach (EnemyBehavior enemy in transform.GetComponentsInChildren<EnemyBehavior>())
+            {
+                enemy.CheckKnockonEffects();
+            }
+
+            isProcessing = false;
+
+            for (int i = 0; i < gridWidth; i++)
+            {
+                for (int j = 0; j < gridHeight; j++)
+                {
+                    bool positionChanged = (positionHistory[i, j] != ((enemies[i, j] != null) && enemies[i, j].isAlive));
+                    bool moved = (movementHistory[i, j] != new Vector2Int(0,0));
+
+                    if (positionChanged || moved)
+                    {
+                        isProcessing = true;
+                    }
+                }
+            }
+
+            yield return new WaitForSeconds(effectDuration);
+        }
+
+        foreach (EnemyBehavior enemy in transform.GetComponentsInChildren<EnemyBehavior>())
+        {
+            enemy.FinishEffect();
+        }
+
+        player.TryEscape();
+    }
+
+    public bool JustEmptied(int x, int y)
+    {
+        if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight) return false;
+
+        return (positionHistory[x, y] && ((enemies[x, y] == null) || !enemies[x, y].isAlive)) ;
     }
 }
