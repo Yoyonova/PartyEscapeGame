@@ -35,10 +35,11 @@ public class EnemyManager : MonoBehaviour
         int levelIndex = levelText.text.IndexOf(currentLevel);
 
         spellCount = int.Parse(levelText.text.Substring(levelIndex + 10, 2));
+        spellManager.maxMana = int.Parse(levelText.text.Substring(levelIndex + 13, 2));
         spells = new string[spellCount];
         for (int i = 0; i < spellCount; i++)
         {
-            int nextSpellIndex = levelIndex + 14 + i * 4;
+            int nextSpellIndex = levelIndex + 17 + i * 4;
             spells[i] = levelText.text.Substring(nextSpellIndex, 3);
         }
         spellManager.LoadSpells(spells);
@@ -55,7 +56,7 @@ public class EnemyManager : MonoBehaviour
         {
             for (int j = 0; j < gridHeight; j++)
             {
-                int nextEnemyIndex = levelIndex + 15 + spellCount * 4 + j * (gridWidth * 2 + 2) + i * 2;
+                int nextEnemyIndex = levelIndex + 18 + spellCount * 4 + j * (gridWidth * 2 + 2) + i * 2;
                 string nextEnemyAttribute1 = levelText.text.Substring(nextEnemyIndex, 2);
 
 
@@ -87,6 +88,7 @@ public class EnemyManager : MonoBehaviour
         enemies[x, y].UpdatePosition();
         enemies[x, y].attributes[attribute1] = true;
         enemies[x, y].UpdateAttributeDisplay();
+        enemies[x, y].InitializeHistory();
     }
 
     public void UpdateEnemyPositions()
@@ -113,7 +115,7 @@ public class EnemyManager : MonoBehaviour
     {
         isProcessing = true;
 
-        while (isProcessing)
+        while (true)
         {
 
             bool isValidBoard = false;
@@ -178,7 +180,7 @@ public class EnemyManager : MonoBehaviour
                 enemy.CheckKnockonEffects();
             }
 
-            isProcessing = false;
+            bool willContinue = false;
 
             for (int i = 0; i < gridWidth; i++)
             {
@@ -189,10 +191,12 @@ public class EnemyManager : MonoBehaviour
 
                     if (positionChanged || moved)
                     {
-                        isProcessing = true;
+                        willContinue = true;
                     }
                 }
             }
+
+            if (!willContinue) break;
 
             yield return new WaitForSeconds(effectDuration);
         }
@@ -203,6 +207,8 @@ public class EnemyManager : MonoBehaviour
         }
 
         player.TryEscape();
+
+        isProcessing = false;
     }
 
     public bool JustEmptied(int x, int y)

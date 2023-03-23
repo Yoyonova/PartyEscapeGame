@@ -16,7 +16,7 @@ public class PlayerBehavior : MonoBehaviour
 
         if(canEscape)
         {
-            Destroy(transform.gameObject);
+            transform.GetComponent<SpriteRenderer>().enabled = false;
         }
     }
 

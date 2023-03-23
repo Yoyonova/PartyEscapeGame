@@ -11,8 +11,12 @@ public class EnemyBehavior : MonoBehaviour
     public SpriteRenderer[] attributeIcons;
 
     public bool isAlive = true;
+    private bool willBeAlive = true;
 
     private List<Vector2Int> recentPositions = new();
+
+    private List<Vector2Int> positionHistory;
+    private List<bool> lifeHistory;
 
     public void UpdateAttributeDisplay()
     {
@@ -34,7 +38,7 @@ public class EnemyBehavior : MonoBehaviour
                 }
                 else
                 {
-                    isAlive = false;
+                    willBeAlive = false;
                     UpdateVisibility();
                 }
                 break;
@@ -84,6 +88,12 @@ public class EnemyBehavior : MonoBehaviour
         x = xProspective;
         y = yProspective;
 
+        if(isAlive != willBeAlive)
+        {
+            isAlive = willBeAlive;
+            UpdateVisibility();
+        }
+
         UpdatePosition();
     }
 
@@ -128,10 +138,47 @@ public class EnemyBehavior : MonoBehaviour
     public void FinishEffect()
     {
         recentPositions = new();
+        positionHistory.Add(new Vector2Int(x, y));
+        lifeHistory.Add(isAlive);
     }
 
     private bool IsRepeatMove(int x, int y)
     {
         return recentPositions.Contains(new Vector2Int(x, y));
+    }
+
+    public void Reset()
+    {
+        x = positionHistory[0].x;
+        y = positionHistory[0].y;
+        isAlive = lifeHistory[0];
+        willBeAlive = isAlive;
+
+        UpdatePosition();
+        UpdateVisibility();
+        InitializeHistory();
+    }
+
+    public void UndoMove()
+    {
+        x = positionHistory[positionHistory.Count - 2].x;
+        y = positionHistory[positionHistory.Count - 2].y;
+        isAlive = lifeHistory[lifeHistory.Count - 2];
+        willBeAlive = isAlive;
+
+        positionHistory.RemoveAt(positionHistory.Count - 1);
+        lifeHistory.RemoveAt(lifeHistory.Count - 1);
+
+        UpdatePosition();
+        UpdateVisibility();
+    }
+
+    public void InitializeHistory()
+    {
+        positionHistory = new();
+        lifeHistory = new();
+
+        positionHistory.Add(new Vector2Int(x, y));
+        lifeHistory.Add(isAlive);
     }
 }

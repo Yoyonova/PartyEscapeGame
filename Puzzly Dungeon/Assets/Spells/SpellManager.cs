@@ -18,6 +18,8 @@ public class SpellManager : MonoBehaviour
     public int spellCount, selectedSpell, maxMana, mana;
     private List<GameObject> manaIcons = new List<GameObject>();
 
+    private List<int> manaHistory = new();
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -26,8 +28,8 @@ public class SpellManager : MonoBehaviour
 
             float gridX = mousePosition.x - enemyManager.transform.position.x;
             float gridY = mousePosition.y - enemyManager.transform.position.y;
-            bool clickedWithinGridX = gridX > 0 && gridX < enemyManager.cellSize * enemyManager.maxGridWidth;
-            bool clickedWithinGridY = gridY > 0 && gridY < enemyManager.cellSize * enemyManager.maxGridHeight;
+            bool clickedWithinGridX = gridX > 0 && gridX < enemyManager.cellSize * enemyManager.gridWidth;
+            bool clickedWithinGridY = gridY > 0 && gridY < enemyManager.cellSize * enemyManager.gridHeight;
 
             float spellsX = mousePosition.x - transform.position.x;
             float spellsY = -1 * (mousePosition.y - transform.position.y);
@@ -46,6 +48,7 @@ public class SpellManager : MonoBehaviour
                     mana -= spells[selectedSpell].cost;
                     spells[selectedSpell].castSpell(enemyX, enemyY);
                     UpdateManaDisplay();
+                    manaHistory.Add(mana);
                 }
             } else if (clickedOnSpell)
             {
@@ -54,14 +57,21 @@ public class SpellManager : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && !enemyManager.isProcessing)
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            ResetLevel();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Z) && !enemyManager.isProcessing)
+        {
+            UndoMove();
         }
     }
 
     public void LoadSpells(string[] spellIds)
     {
+        mana = maxMana;
+
         spellCount = spellIds.Length;
         spells = new SpellBehavior[spellCount];
 
@@ -75,6 +85,8 @@ public class SpellManager : MonoBehaviour
         }
 
         UpdateManaDisplay();
+
+        manaHistory.Add(mana);
     }
 
     public void UpdateManaDisplay()
@@ -96,6 +108,38 @@ public class SpellManager : MonoBehaviour
             newIcon.transform.localScale = new Vector3(.5f, .5f);
             newIcon.sortingOrder = 10;
             manaIcons.Add(newIcon.gameObject);
+        }
+    }
+
+    private void ResetLevel()
+    {
+        mana = manaHistory[0];
+        manaHistory = new();
+        manaHistory.Add(mana);
+        UpdateManaDisplay();
+
+        foreach (EnemyBehavior enemy in enemyManager.transform.GetComponentsInChildren<EnemyBehavior>())
+        {
+            enemy.Reset();
+        }
+
+        enemyManager.UpdateEnemyPositions();
+    }
+
+    private void UndoMove()
+    {
+        if(manaHistory.Count > 1)
+        {
+            mana = manaHistory[manaHistory.Count - 2];
+            manaHistory.RemoveAt(manaHistory.Count - 1);
+            UpdateManaDisplay();
+
+            foreach (EnemyBehavior enemy in enemyManager.transform.GetComponentsInChildren<EnemyBehavior>())
+            {
+                enemy.UndoMove();
+            }
+
+            enemyManager.UpdateEnemyPositions();
         }
     }
 }
