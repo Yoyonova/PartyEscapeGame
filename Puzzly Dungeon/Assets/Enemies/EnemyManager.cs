@@ -85,7 +85,7 @@ public class EnemyManager : MonoBehaviour
         enemies[x, y].transform.parent = transform;
         enemies[x, y].x = x;
         enemies[x, y].y = y;
-        enemies[x, y].UpdatePosition();
+        enemies[x, y].InitializePosition();
         enemies[x, y].attributes[attribute1] = true;
         enemies[x, y].UpdateAttributeDisplay();
         enemies[x, y].InitializeHistory();
@@ -128,31 +128,40 @@ public class EnemyManager : MonoBehaviour
 
                 foreach (EnemyBehavior enemy in transform.GetComponentsInChildren<EnemyBehavior>())
                 {
-                    if (enemy.isAlive)
+                    if (enemy.isAlive && !enemy.willBonk)
                     {
                         bool enemyIsOutsideX = enemy.xProspective < 0 || enemy.xProspective >= gridWidth;
                         bool enemyIsOutsideY = enemy.yProspective < 0 || enemy.yProspective >= gridHeight;
                         bool enemyIsOnPlayer = (enemy.xProspective == player.x) && (enemy.yProspective == player.y);
                         if (enemyIsOutsideX || enemyIsOutsideY || enemyIsOnPlayer)
                         {
-                            enemy.xProspective = enemy.x;
-                            enemy.yProspective = enemy.y;
-
+                            enemy.willBonk = true;
                             isValidBoard = false;
-                        }
-                        else if (newEnemies[enemy.xProspective, enemy.yProspective] != null) // Collision occurred, so cancel movement
+                        }else if (newEnemies[enemy.xProspective, enemy.yProspective] != null) // Collision occurred, so cancel movement
                         {
                             EnemyBehavior collidedEnemy = newEnemies[enemy.xProspective, enemy.yProspective];
-                            collidedEnemy.xProspective = collidedEnemy.x;
-                            collidedEnemy.yProspective = collidedEnemy.y;
-                            enemy.xProspective = enemy.x;
-                            enemy.yProspective = enemy.y;
 
+                            collidedEnemy.willBonk = true;
+                            enemy.willBonk = true;
                             isValidBoard = false;
                         }
                         else
                         {
                             newEnemies[enemy.xProspective, enemy.yProspective] = enemy;
+                        }
+                    } else if(enemy.isAlive)
+                    {
+                        if (newEnemies[enemy.x, enemy.y] != null) // Collision occurred, so cancel movement
+                        {
+                            EnemyBehavior collidedEnemy = newEnemies[enemy.x, enemy.y];
+
+                            collidedEnemy.willBonk = true;
+                            enemy.willBonk = true;
+                            isValidBoard = false;
+                        }
+                        else
+                        {
+                            newEnemies[enemy.x, enemy.y] = enemy;
                         }
                     }
                 }
