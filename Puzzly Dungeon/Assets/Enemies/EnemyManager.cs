@@ -111,6 +111,18 @@ public class EnemyManager : MonoBehaviour
         return (ContainsEnemy(x, y) || x < 0 || x >= gridWidth || y < 0 || y >= gridHeight);
     }
 
+    public List<EnemyBehavior> GetAdjacentEnemies(int x, int y)
+    {
+        List<EnemyBehavior> adjacentEnemies = new();
+
+        if (ContainsEnemy(x + 1, y)) adjacentEnemies.Add(enemies[x + 1, y]);
+        if (ContainsEnemy(x - 1, y)) adjacentEnemies.Add(enemies[x - 1, y]);
+        if (ContainsEnemy(x, y + 1)) adjacentEnemies.Add(enemies[x, y + 1]);
+        if (ContainsEnemy(x, y - 1)) adjacentEnemies.Add(enemies[x, y - 1]);
+
+        return adjacentEnemies;
+    }
+
     public IEnumerator ProcessSpellEffect()
     {
         isProcessing = true;

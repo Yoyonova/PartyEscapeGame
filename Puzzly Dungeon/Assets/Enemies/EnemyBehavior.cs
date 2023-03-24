@@ -20,6 +20,7 @@ public class EnemyBehavior : MonoBehaviour
     public bool[] attributes;
     public SpriteRenderer[] attributeIcons;
     private bool hasBeenAss = false;
+    private bool hasBeenRomanced = false;
 
     public bool isAlive = true;
     public bool willBeAlive = true;
@@ -172,67 +173,99 @@ public class EnemyBehavior : MonoBehaviour
 
     public void CheckKnockonEffects()
     {
-        if(attributes[2]) // Has Party Hat
+        if (isAlive)
         {
-            int placesToGo = 0;
-
-            if (EnemyManager.instance.JustEmptied(x + 1, y) && !IsRepeatMove(x + 1, y))
+            if (attributes[2]) // Has Party Hat
             {
-                placesToGo++;
-                xProspective++;
-            }
+                int placesToGo = 0;
+                char effect = '.';
 
-            if (EnemyManager.instance.JustEmptied(x - 1, y) && !IsRepeatMove(x - 1, y))
-            {
-                placesToGo++;
-                xProspective--;
-            }
-
-            if (EnemyManager.instance.JustEmptied(x, y + 1) && !IsRepeatMove(x, y + 1))
-            {
-                placesToGo++;
-                yProspective++;
-            }
-
-            if (EnemyManager.instance.JustEmptied(x, y - 1) && !IsRepeatMove(x, y - 1))
-            {
-                placesToGo++;
-                yProspective--;
-            }
-
-            if(placesToGo != 1)
-            {
-                xProspective = x; // THIS MIGHT MESS THINGS UP LATER BY RESETTING MOVEMENT!!!
-                yProspective = y;
-            }
-        }
-
-        if (attributes[3]) // Has Asshole Cap
-        {
-            bool hasBonked = xBonk != x || yBonk != y;
-            bool bonkedIntoPerson = EnemyManager.instance.ContainsEnemy(xBonk, yBonk);
-            if (!hasBeenAss && hasBonked && bonkedIntoPerson)
-            {
-                hasBeenAss = true;
-                char effect;
-
-                if (xBonk > x)
+                if (EnemyManager.instance.JustEmptied(x + 1, y) && !IsRepeatMove(x + 1, y))
                 {
+                    placesToGo++;
                     effect = 'R';
-                } else if(xBonk < x)
+                }
+
+                if (EnemyManager.instance.JustEmptied(x - 1, y) && !IsRepeatMove(x - 1, y))
                 {
+                    placesToGo++;
                     effect = 'L';
-                } else if(yBonk > y)
+                }
+
+                if (EnemyManager.instance.JustEmptied(x, y + 1) && !IsRepeatMove(x, y + 1))
                 {
+                    placesToGo++;
                     effect = 'U';
-                } else
+                }
+
+                if (EnemyManager.instance.JustEmptied(x, y - 1) && !IsRepeatMove(x, y - 1))
                 {
+                    placesToGo++;
                     effect = 'D';
                 }
 
-                EnemyManager.instance.enemies[xBonk, yBonk].ApplyEffect(effect);
-                Debug.Log("Ass");
+                if (placesToGo == 1)
+                {
+                    ApplyEffect(effect);
+                }
             }
+
+            if (attributes[3]) // Has Asshole Cap
+            {
+                bool hasBonked = xBonk != x || yBonk != y;
+                bool bonkedIntoPerson = EnemyManager.instance.ContainsEnemy(xBonk, yBonk);
+                if (!hasBeenAss && hasBonked && bonkedIntoPerson)
+                {
+                    hasBeenAss = true;
+                    char effect;
+
+                    if (xBonk > x)
+                    {
+                        effect = 'R';
+                    }
+                    else if (xBonk < x)
+                    {
+                        effect = 'L';
+                    }
+                    else if (yBonk > y)
+                    {
+                        effect = 'U';
+                    }
+                    else
+                    {
+                        effect = 'D';
+                    }
+
+                    EnemyManager.instance.enemies[xBonk, yBonk].ApplyEffect(effect);
+                }
+            }
+
+            if (attributes[4]) // Has Heart
+            {
+                List<EnemyBehavior> romantics = new();
+                FindConnectedRomantics(romantics);
+
+                if (romantics.Count >= 2 && !hasBeenRomanced)
+                {
+                    foreach (EnemyBehavior romantic in romantics)
+                    {
+                        romantic.hasBeenRomanced = true;
+                        romantic.ApplyEffect('X');
+                    }
+                }
+            }
+        }
+    }
+
+    private void FindConnectedRomantics(List<EnemyBehavior> romantics)
+    {
+        if (!attributes[4] || romantics.Contains(this)) return;
+
+        romantics.Add(this);
+
+        foreach(EnemyBehavior enemy in EnemyManager.instance.GetAdjacentEnemies(x, y))
+        {
+            enemy.FindConnectedRomantics(romantics);
         }
     }
 
@@ -246,6 +279,7 @@ public class EnemyBehavior : MonoBehaviour
     {
         recentPositions = new();
         hasBeenAss = false;
+        hasBeenRomanced = false;
 
         positionHistory.Add(new Vector2Int(x, y));
         lifeHistory.Add(isAlive);
