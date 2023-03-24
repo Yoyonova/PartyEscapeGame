@@ -54,7 +54,7 @@ public class SpellBehavior : MonoBehaviour
         {
             for (int j = Math.Max(0, y - spellRadius); j < Math.Min(enemyManager.gridHeight, y + spellRadius); j++)
             {
-                if (enemies[i, j] != null)
+                if (enemies[i, j] != null && effects[i - x + spellRadius, y - j + spellRadius] != '.')
                 {
                     enemies[i, j].ApplyEffect(effects[i - x + spellRadius, y - j + spellRadius]);
                 }
