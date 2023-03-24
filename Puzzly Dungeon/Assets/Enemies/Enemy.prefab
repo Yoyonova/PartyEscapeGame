@@ -629,10 +629,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 208bc503d89e5a645bc0fc793cc99559, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  acceleration: 100
+  positionPrecision: 0.2
+  deceleration: 100
+  randomSpeedVariation: 0.2
+  InstantSpeed: 10
   x: 0
   y: 0
   xProspective: 0
   yProspective: 0
+  willBonk: 0
   attributes: 000000
   attributeIcons:
   - {fileID: 0}

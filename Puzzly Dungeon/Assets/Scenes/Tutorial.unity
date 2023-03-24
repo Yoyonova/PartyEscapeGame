@@ -420,7 +420,7 @@ MonoBehaviour:
   baseCellSize: 6
   cellSize: 1
   effectDuration: 0.5
-  currentLevel: AAA
+  currentLevel: AAB
   spellManager: {fileID: 8637854}
   player: {fileID: 203245416}
   exitX: 0

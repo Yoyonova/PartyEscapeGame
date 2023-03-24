@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class EnemyBehavior : MonoBehaviour
 {
-    [SerializeField] private float acceleration = 25f;
+    [SerializeField] private float acceleration = 50f;
     [SerializeField] private float positionPrecision = 0.2f;
-    [SerializeField] private float deceleration = 200f;
+    [SerializeField] private float deceleration = 50f;
     [SerializeField] private float randomSpeedVariation = 0.2f;
-    [SerializeField] private float bonkSpeed = 10f;
+    [SerializeField] private float InstantSpeed = 15f;
     private float randomSpeedFactor = 1f;
     private Rigidbody2D rigidBody;
 
@@ -21,12 +21,13 @@ public class EnemyBehavior : MonoBehaviour
     public SpriteRenderer[] attributeIcons;
 
     public bool isAlive = true;
-    private bool willBeAlive = true;
+    public bool willBeAlive = true;
 
     private List<Vector2Int> recentPositions = new();
 
     private List<Vector2Int> positionHistory;
     private List<bool> lifeHistory;
+    private List<bool[]> attributeHistory;
 
     private void Start()
     {
@@ -42,6 +43,12 @@ public class EnemyBehavior : MonoBehaviour
         if (proximity > positionPrecision)
         {
             Vector2 moveDirection = (targetPosition - transform.localPosition).normalized;
+            bool isMovingAway = Vector2.Angle(moveDirection, rigidBody.velocity) > 90;
+
+            if (isMovingAway) {
+                rigidBody.velocity -= rigidBody.velocity.normalized * deceleration * Time.deltaTime * randomSpeedFactor;
+            }
+
             rigidBody.velocity += moveDirection * acceleration * Time.deltaTime * randomSpeedFactor;
         } else
         {
@@ -65,34 +72,32 @@ public class EnemyBehavior : MonoBehaviour
 
     public void ApplyEffect(char effect)
     {
-        switch (effect)
+        if (attributes[1]) // Has a shield
         {
-            case 'X':
-                if (attributes[1]) // Has a shield
-                {
-                    attributes[1] = false;
-                    UpdateAttributeDisplay();
-                }
-                else
-                {
+            attributes[1] = false;
+        }
+        else
+        {
+            switch (effect)
+            {
+                case 'X':
                     willBeAlive = false;
-                    UpdateVisibility();
-                }
-                break;
-            case 'R':
-                xProspective += 1;
-                break;
-            case 'L':
-                xProspective -= 1;
-                break;
-            case 'U':
-                yProspective += 1;
-                break;
-            case 'D':
-                yProspective -= 1;
-                break;
-            default:
-                break;
+                    break;
+                case 'R':
+                    xProspective += 1;
+                    break;
+                case 'L':
+                    xProspective -= 1;
+                    break;
+                case 'U':
+                    yProspective += 1;
+                    break;
+                case 'D':
+                    yProspective -= 1;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -122,6 +127,8 @@ public class EnemyBehavior : MonoBehaviour
 
     public void ConfirmEffect()
     {
+        StartMove();
+
         if (!willBonk)
         {
             if (x != xProspective || y != yProspective) // Log movement
@@ -134,28 +141,24 @@ public class EnemyBehavior : MonoBehaviour
             y = yProspective;
         } else
         {
-            Bonk();
             willBonk = false;
 
             xProspective = x;
             yProspective = y;
         }
 
-        if(isAlive != willBeAlive)
-        {
-            isAlive = willBeAlive;
-            UpdateVisibility();
-        }
+        isAlive = willBeAlive;
 
+        UpdateVisibility();
         UpdatePosition();
     }
 
-    private void Bonk()
+    private void StartMove()
     {
-        Vector2 bonkDirection = new Vector2(xProspective, yProspective) - new Vector2(x, y);
+        Vector2 moveDirection = new Vector2(xProspective, yProspective) - new Vector2(x, y);
 
-        if (bonkDirection != new Vector2(0, 0)) {
-            rigidBody.velocity += bonkDirection.normalized * bonkSpeed;
+        if (moveDirection != new Vector2(0, 0)) {
+            rigidBody.velocity += moveDirection.normalized * InstantSpeed;
         }
     }
 
@@ -200,8 +203,11 @@ public class EnemyBehavior : MonoBehaviour
     public void FinishEffect()
     {
         recentPositions = new();
+
         positionHistory.Add(new Vector2Int(x, y));
         lifeHistory.Add(isAlive);
+        attributeHistory.Add(new bool[attributes.Length]);
+        attributes.CopyTo(attributeHistory[attributeHistory.Count - 1], 0);
     }
 
     private bool IsRepeatMove(int x, int y)
@@ -213,8 +219,11 @@ public class EnemyBehavior : MonoBehaviour
     {
         x = positionHistory[0].x;
         y = positionHistory[0].y;
+
         isAlive = lifeHistory[0];
         willBeAlive = isAlive;
+
+        attributeHistory[0].CopyTo(attributes, 0);
 
         UpdatePosition();
         UpdateVisibility();
@@ -225,11 +234,15 @@ public class EnemyBehavior : MonoBehaviour
     {
         x = positionHistory[positionHistory.Count - 2].x;
         y = positionHistory[positionHistory.Count - 2].y;
+
         isAlive = lifeHistory[lifeHistory.Count - 2];
         willBeAlive = isAlive;
 
+        attributeHistory[attributeHistory.Count - 2].CopyTo(attributes, 0);
+
         positionHistory.RemoveAt(positionHistory.Count - 1);
         lifeHistory.RemoveAt(lifeHistory.Count - 1);
+        attributeHistory.RemoveAt(attributeHistory.Count - 1);
 
         UpdatePosition();
         UpdateVisibility();
@@ -239,8 +252,11 @@ public class EnemyBehavior : MonoBehaviour
     {
         positionHistory = new();
         lifeHistory = new();
+        attributeHistory = new();
 
         positionHistory.Add(new Vector2Int(x, y));
         lifeHistory.Add(isAlive);
+        attributeHistory.Add(new bool[attributes.Length]);
+        attributes.CopyTo(attributeHistory[0], 0);
     }
 }
