@@ -419,8 +419,8 @@ MonoBehaviour:
   spellCount: 3
   baseCellSize: 6
   cellSize: 1
-  effectDuration: 0.5
-  currentLevel: AAB
+  effectDuration: 0.2
+  currentLevel: AAD
   spellManager: {fileID: 8637854}
   player: {fileID: 203245416}
   exitX: 0

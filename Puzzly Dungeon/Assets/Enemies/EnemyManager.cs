@@ -186,18 +186,11 @@ public class EnemyManager : MonoBehaviour
 
             bool willContinue = false;
 
-            for (int i = 0; i < gridWidth; i++)
+            foreach (EnemyBehavior enemy in transform.GetComponentsInChildren<EnemyBehavior>())
             {
-                for (int j = 0; j < gridHeight; j++)
-                {
-                    bool positionChanged = (positionHistory[i, j] != ((enemies[i, j] != null) && enemies[i, j].isAlive));
-                    bool moved = (movementHistory[i, j] != new Vector2Int(0,0));
+                if (enemy.didSomething) willContinue = true;
 
-                    if (positionChanged || moved)
-                    {
-                        willContinue = true;
-                    }
-                }
+                enemy.ResetEffectIteration();
             }
 
             if (!willContinue) break;

@@ -12,18 +12,20 @@ public class EnemyBehavior : MonoBehaviour
     private float randomSpeedFactor = 1f;
     private Rigidbody2D rigidBody;
 
-    public int x, y;
-    public int xProspective, yProspective;
+    public int x, y, xProspective, yProspective;
+    private int xBonk, yBonk;
     public bool willBonk = false;
     private Vector3 targetPosition;
 
     public bool[] attributes;
     public SpriteRenderer[] attributeIcons;
+    private bool hasBeenAss = false;
 
     public bool isAlive = true;
     public bool willBeAlive = true;
 
     private List<Vector2Int> recentPositions = new();
+    public bool didSomething = false;
 
     private List<Vector2Int> positionHistory;
     private List<bool> lifeHistory;
@@ -72,6 +74,8 @@ public class EnemyBehavior : MonoBehaviour
 
     public void ApplyEffect(char effect)
     {
+        didSomething = true;
+
         if (attributes[1]) // Has a shield
         {
             attributes[1] = false;
@@ -114,8 +118,6 @@ public class EnemyBehavior : MonoBehaviour
     public void UpdatePosition()
     {
         targetPosition = new Vector3((x + 0.5f) * EnemyManager.instance.cellSize, (y + 0.5f) * EnemyManager.instance.cellSize);
-        xProspective = x;
-        yProspective = y;
     }
 
     public void InitializePosition()
@@ -123,6 +125,8 @@ public class EnemyBehavior : MonoBehaviour
         UpdatePosition();
         transform.localScale = new Vector3(EnemyManager.instance.cellSize, EnemyManager.instance.cellSize);
         transform.localPosition = targetPosition;
+        xProspective = x;
+        yProspective = y;
     }
 
     public void ConfirmEffect()
@@ -139,9 +143,13 @@ public class EnemyBehavior : MonoBehaviour
 
             x = xProspective;
             y = yProspective;
-        } else
+            xBonk = x;
+            yBonk = y;
+        }
+        else
         {
-            willBonk = false;
+            xBonk = xProspective;
+            yBonk = yProspective;
 
             xProspective = x;
             yProspective = y;
@@ -198,11 +206,46 @@ public class EnemyBehavior : MonoBehaviour
                 yProspective = y;
             }
         }
+
+        if (attributes[3]) // Has Asshole Cap
+        {
+            bool hasBonked = xBonk != x || yBonk != y;
+            bool bonkedIntoPerson = EnemyManager.instance.ContainsEnemy(xBonk, yBonk);
+            if (!hasBeenAss && hasBonked && bonkedIntoPerson)
+            {
+                hasBeenAss = true;
+                char effect;
+
+                if (xBonk > x)
+                {
+                    effect = 'R';
+                } else if(xBonk < x)
+                {
+                    effect = 'L';
+                } else if(yBonk > y)
+                {
+                    effect = 'U';
+                } else
+                {
+                    effect = 'D';
+                }
+
+                EnemyManager.instance.enemies[xBonk, yBonk].ApplyEffect(effect);
+                Debug.Log("Ass");
+            }
+        }
+    }
+
+    public void ResetEffectIteration()
+    {
+        willBonk = false;
+        didSomething = false;
     }
 
     public void FinishEffect()
     {
         recentPositions = new();
+        hasBeenAss = false;
 
         positionHistory.Add(new Vector2Int(x, y));
         lifeHistory.Add(isAlive);
@@ -219,6 +262,8 @@ public class EnemyBehavior : MonoBehaviour
     {
         x = positionHistory[0].x;
         y = positionHistory[0].y;
+        xProspective = x;
+        yProspective = y;
 
         isAlive = lifeHistory[0];
         willBeAlive = isAlive;
@@ -234,6 +279,8 @@ public class EnemyBehavior : MonoBehaviour
     {
         x = positionHistory[positionHistory.Count - 2].x;
         y = positionHistory[positionHistory.Count - 2].y;
+        xProspective = x;
+        yProspective = y;
 
         isAlive = lifeHistory[lifeHistory.Count - 2];
         willBeAlive = isAlive;
