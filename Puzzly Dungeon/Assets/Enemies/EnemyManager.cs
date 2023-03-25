@@ -226,4 +226,14 @@ public class EnemyManager : MonoBehaviour
 
         return (positionHistory[x, y] && ((enemies[x, y] == null) || !enemies[x, y].isAlive)) ;
     }
+
+    public float GetLevelWidth()
+    {
+        return cellSize * gridWidth;
+    }
+
+    public float GetLevelHeight()
+    {
+        return cellSize * gridHeight;
+    }
 }

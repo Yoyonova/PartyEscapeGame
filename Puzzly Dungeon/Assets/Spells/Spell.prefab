@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dec58124032e2a4082bed634c6fc4bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiMaterial: {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   iconOffset: {x: 1, y: 0, z: 0}
   iconSize: 0.4
   iconGap: 0.6

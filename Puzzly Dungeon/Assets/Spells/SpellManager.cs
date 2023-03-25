@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class SpellManager : MonoBehaviour
 {
+    [SerializeField] private Material uiMaterial;
+
     public float SpellPositionGap = 3f;
     public float SpellPositionWidth = 5f;
 
@@ -105,6 +107,7 @@ public class SpellManager : MonoBehaviour
             newIcon.transform.parent = transform;
             newIcon.transform.localPosition = new Vector3(1.5f + (i % 2), 3 - 0.5f * i);
             newIcon.sprite = newSprite;
+            newIcon.material = uiMaterial;
             newIcon.transform.localScale = new Vector3(.5f, .5f);
             newIcon.sortingOrder = 10;
             manaIcons.Add(newIcon.gameObject);

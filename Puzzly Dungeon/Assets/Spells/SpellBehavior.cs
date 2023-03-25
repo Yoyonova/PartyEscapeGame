@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class SpellBehavior : MonoBehaviour
 {
+    [SerializeField] Material uiMaterial;
+
     public Vector3 iconOffset;
     public float iconSize = .2f;
     public float iconGap = .3f;
@@ -38,6 +40,7 @@ public class SpellBehavior : MonoBehaviour
                     newIcon.transform.localPosition = iconOffset + new Vector3(i * iconGap, -1 * j * iconGap);
                     int spriteIndex = effects[i,j] - 'A';
                     newIcon.sprite = iconSprites[spriteIndex];
+                    newIcon.material = uiMaterial;
                     newIcon.transform.localScale = new Vector3(iconSize, iconSize);
                 }
             }
