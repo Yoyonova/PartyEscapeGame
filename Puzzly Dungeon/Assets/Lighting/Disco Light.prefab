@@ -50,7 +50,7 @@ MonoBehaviour:
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
   m_Color: {r: 0.8207547, g: 0.111498706, b: 0.737722, a: 1}
-  m_Intensity: 3
+  m_Intensity: 2
   m_LightVolumeIntensity: 1
   m_LightVolumeIntensityEnabled: 0
   m_ApplyToSortingLayers: 00000000
@@ -127,7 +127,7 @@ MonoBehaviour:
   maxRotation: 25
   duration: 5
   durationVariance: 0.2
-  maxIntensity: 1
+  maxIntensity: 0.5
   intensityVariance: 0.2
   startingIntensityFactor: 0.2
   spotLight: {fileID: 1549415769605674751}

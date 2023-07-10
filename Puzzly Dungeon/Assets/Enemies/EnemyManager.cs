@@ -24,6 +24,8 @@ public class EnemyManager : MonoBehaviour
     private bool[,] positionHistory;
     public Vector2Int[,] movementHistory;
 
+    public Transform exit;
+
     void Start()
     {
         instance = this;
@@ -77,6 +79,9 @@ public class EnemyManager : MonoBehaviour
                 }
             }
         }
+
+        exit.localPosition = new Vector3((gridWidth - 0.5f) * cellSize, (gridHeight + 0.5f) * cellSize);
+        exit.localScale = new Vector3(cellSize, cellSize) * 0.1f;
     }
 
     private void SpawnEnemy(int x, int y, int attribute1)

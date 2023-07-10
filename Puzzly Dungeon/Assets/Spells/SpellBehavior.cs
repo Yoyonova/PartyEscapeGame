@@ -6,6 +6,7 @@ using UnityEngine;
 public class SpellBehavior : MonoBehaviour
 {
     [SerializeField] Material uiMaterial;
+    [SerializeField] AudioSource soundEffect;
 
     public Vector3 iconOffset;
     public float iconSize = .2f;
@@ -63,6 +64,8 @@ public class SpellBehavior : MonoBehaviour
                 }
             }
         }
+
+        soundEffect.Play();
 
         StartCoroutine(enemyManager.ProcessSpellEffect());
     }

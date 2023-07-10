@@ -15,6 +15,8 @@ public class EnemyAnimation : MonoBehaviour
         rightHandOrigin = rightHand.localPosition;
         leftFootOrigin = leftFoot.localPosition;
         rightFootOrigin = rightFoot.localPosition;
+
+        animationState = Random.value;
     }
 
     void Update()

@@ -124,7 +124,7 @@ public class EnemyBehavior : MonoBehaviour
     public void InitializePosition()
     {
         UpdatePosition();
-        transform.localScale = new Vector3(EnemyManager.instance.cellSize, EnemyManager.instance.cellSize);
+        transform.localScale = new Vector3(EnemyManager.instance.cellSize, EnemyManager.instance.cellSize) * 0.7f;
         transform.localPosition = targetPosition;
         xProspective = x;
         yProspective = y;
